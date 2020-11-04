@@ -1,0 +1,65 @@
+﻿@using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models
+
+<div class="work-item-list__header">
+    <h3>Work Item List</h3>
+    <button class="btn btn-info"
+            @onclick="HandleRefresh">
+        Refresh
+    </button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Title</th>
+            <th scope="col">#</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var workItem in WorkItems)
+        {
+            <tr>
+                <td>@workItem.Fields["System.Title"]</td>
+                <th scope="row">
+                    <a href="https://dev.azure.com/@ApplicationState.Organization/@ApplicationState.Project/_workitems/edit/@workItem.Id"
+                       title="Open Edit"
+                       target="_blank">
+                        @workItem.Id
+                    </a>
+                </th>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public string AccessToken { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    public ApplicationState ApplicationState { get; set; }
+
+    [Inject]
+    public IHttpClientFactory ClientFactory { get; set; } = null!;
+    [Inject]
+    public WorkItemListService Service { get; set; }
+
+    public IEnumerable<WorkItem> WorkItems { get; set; } = new List<WorkItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HandleRefresh();
+    }
+
+    private async Task HandleRefresh()
+    {
+        WorkItems = await Service.List(
+            AccessToken,
+            organization: ApplicationState.Organization,
+            project: ApplicationState.Project,
+            team: ApplicationState.Team,
+            backlogId: ApplicationState.BacklogId
+        );
+    }
+
+}

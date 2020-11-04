@@ -1,0 +1,27 @@
+﻿@page
+@model EventHorizon.DevOps.QuickBoard.Pages.OAuth.CallbackModel
+
+<h2>Authorization Details</h2>
+
+@if (!String.IsNullOrEmpty(Model.Error))
+{
+    <p>@Model.Error</p>
+}
+else
+{
+    <p>Successfully Authorized Redirect in <span class="redirect-timer">5</span>...</p>
+    <script>
+        var timeLeft = 5;
+        var redirectTimer = document.querySelector(".redirect-timer");
+        window.setInterval(function () {
+            timeLeft -= 1;
+            redirectTimer.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                window.location = "/";
+            }
+        }, 1000);
+    </script>
+}
+
+<p><a target="_blank" href="@Model.ProfileUrl" )">View profile</a></p>
+<p><a href="/">Return to Home</a></p>

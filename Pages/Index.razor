@@ -1,0 +1,55 @@
+﻿@page "/"
+@using Microsoft.Extensions.Options
+@using EventHorizon.DevOps.QuickBoard.Model
+@using EventHorizon.DevOps.QuickBoard.Pages.Application
+
+@if (!ApplicationState.IsValid || IsOpen)
+{
+    <div>
+        <ApplicationStateForm />
+    </div>
+}
+
+
+@if (!State.IsAuthenticated)
+{
+    <p>Your are not current authorized click Authorize below to start...</p>
+    <p><a href="/oauth/authorize" class="btn btn-primary btn-large">Authorize &raquo;</a></p>
+}
+
+<div class="row">
+    @if (State.IsAuthenticated)
+    {
+        <div class="col-md-12">
+            <CreateWorkItemForm AccessToken="@State.TokenDetails.AccessToken" />
+            <WorkItemList AccessToken="@State.TokenDetails.AccessToken" />
+        </div>
+    }
+
+    @if (ApplicationState.IsValid)
+    {
+        <div class="floating-area">
+            <button class="btn btn-outline-dark btn-sm"
+                    @onclick="HandleToggleApplicationStateForm">
+                Toggle Application State
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject]
+    public IOptions<AuthSettings> SettingsOptions { get; set; }
+
+    [CascadingParameter]
+    public Auth.Model.AuthenticationState State { get; set; }
+    [CascadingParameter]
+    public ApplicationState ApplicationState { get; set; }
+
+    public bool IsOpen { get; set; }
+
+    private void HandleToggleApplicationStateForm()
+    {
+        IsOpen = !IsOpen;
+    }
+}

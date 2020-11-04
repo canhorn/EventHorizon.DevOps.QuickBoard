@@ -1,0 +1,33 @@
+﻿@using EventHorizon.DevOps.QuickBoard.Application.Api
+@using EventHorizon.DevOps.QuickBoard.Application.Services
+
+<CascadingValue Value="Services" TValue="ApplicationState">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Inject]
+    public ApplicationStateService Services { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        Services.OnChanged(HandleChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Services.Init();
+        }
+    }
+
+    private Task HandleChanged()
+    {
+        InvokeAsync(StateHasChanged);
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,32 @@
+﻿@using EventHorizon.DevOps.QuickBoard.Auth.Services
+
+<CascadingValue Value="Services.State">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Inject]
+    public AuthenticationServices Services { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        Services.OnChanged(HandleChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Services.Init();
+        }
+    }
+
+    private Task HandleChanged()
+    {
+        InvokeAsync(StateHasChanged);
+        return Task.CompletedTask;
+    }
+}

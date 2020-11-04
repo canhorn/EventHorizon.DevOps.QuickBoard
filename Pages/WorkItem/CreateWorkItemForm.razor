@@ -1,0 +1,89 @@
+﻿@using System.ComponentModel.DataAnnotations
+
+<h3>Create Work Item Form</h3>
+
+<EditForm Model="this" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (!string.IsNullOrWhiteSpace(SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @SuccessMessage
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ErrorMessage
+        </div>
+    }
+
+    <div class="form-group">
+        <InputText class="form-control"
+                   @bind-Value="Title"
+                   placeholder="Enter a Title..." />
+    </div>
+    <div class="form-group">
+        <InputTextArea class="form-control"
+                       @bind-Value="Description"
+                       rows="4"
+                       placeholder="Enter a Description..." />
+    </div>
+
+    <div class="create-work-item-form__actions">
+        <button class="btn btn-primary" type="submit">
+            Create
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public string AccessToken { get; set; } = string.Empty;
+
+    [CascadingParameter]
+    public ApplicationState ApplicationState { get; set; }
+
+    [Inject]
+    WorkItemCreateService Service { get; set; } = null!;
+
+    [Required]
+    public string Title { get; set; } = string.Empty;
+    [Required]
+    public string Description { get; set; } = string.Empty;
+
+    public string SuccessMessage { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    public async Task HandleSubmit()
+    {
+        SuccessMessage = string.Empty;
+        ErrorMessage = string.Empty;
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            return;
+        }
+
+        var result = await Service.Create(
+            AccessToken,
+
+            organization: ApplicationState.Organization,
+            project: ApplicationState.Project,
+            type: ApplicationState.WorkItemType,
+            new WorkItems.Services.Model.WorkItemModel(
+                Title,
+                Description
+            )
+        );
+
+        if (result.Id != null)
+        {
+            SuccessMessage = $"Created new Work Item: {Title}";
+            Title = string.Empty;
+            Description = string.Empty;
+            return;
+        }
+        ErrorMessage = "Failed to Create";
+    }
+}

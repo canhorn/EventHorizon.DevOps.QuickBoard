@@ -1,0 +1,102 @@
+﻿@using EventHorizon.DevOps.QuickBoard.Application.Model
+@using EventHorizon.DevOps.QuickBoard.Application.Services
+
+<h3>Application State Form</h3>
+
+<EditForm Model="Model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (!string.IsNullOrWhiteSpace(SuccessMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @SuccessMessage
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ErrorMessage
+        </div>
+    }
+
+    <div class="form-group">
+        <label>Organization</label>
+        <InputText class="form-control"
+                   @bind-Value="Model.Organization"
+                   placeholder="Enter a Organization..." />
+    </div>
+    <div class="form-group">
+        <label>Project</label>
+        <InputText class="form-control"
+                   @bind-Value="Model.Project"
+                   placeholder="Enter a Project..." />
+    </div>
+    <div class="form-group">
+        <label>Team</label>
+        <InputText class="form-control"
+                   @bind-Value="Model.Team"
+                   placeholder="Enter a Team..." />
+    </div>
+    <div class="form-group">
+        <label>Backlog Id</label>
+        <InputText class="form-control"
+                   @bind-Value="Model.BacklogId"
+                   placeholder="Enter a BacklogId..." />
+    </div>
+    <div class="form-group">
+        <label>Work Item Type</label>
+        <InputText class="form-control"
+                   @bind-Value="Model.WorkItemType"
+                   placeholder="Enter a Work Item Type..." />
+    </div>
+
+    <div class="create-work-item-form__actions">
+        <button class="btn btn-primary" type="submit">
+            Update
+        </button>
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    public ApplicationState State { get; set; }
+
+    [Inject]
+    public ApplicationStateService StateService { get; set; }
+
+    public ApplicationStateModel Model { get; set; } = new ApplicationStateModel();
+    public string SuccessMessage { get; set; } = string.Empty;
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        Model = new ApplicationStateModel
+        {
+            Organization = State.Organization,
+            Project = State.Project,
+            Team = State.Team,
+            BacklogId = State.BacklogId,
+            WorkItemType = State.WorkItemType,
+        };
+    }
+
+    protected override void OnParametersSet()
+    {
+        Model = new ApplicationStateModel
+        {
+            Organization = State.Organization,
+            Project = State.Project,
+            Team = State.Team,
+            BacklogId = State.BacklogId,
+            WorkItemType = State.WorkItemType,
+        };
+    }
+
+    public async Task HandleSubmit()
+    {
+        await StateService.UpdateState(
+            Model
+        );
+    }
+}
